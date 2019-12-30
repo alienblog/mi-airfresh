@@ -213,9 +213,9 @@ class AirFreshDStatus:
     def filter_effi_day(self) -> int:
         return self.data["filter_effi_day"]
 
-    # @property
-    # def ptc_level(self) -> OperationPTCLevel:
-    #     return OperationPTCLevel(self.data["ptc_level"])
+    @property
+    def ptc_level(self) -> OperationPTCLevel:
+        return OperationPTCLevel(self.data["ptc_level"])
 
     @property
     def ptc_status(self) -> bool:
@@ -233,9 +233,9 @@ class AirFreshDStatus:
     def display(self) -> bool:
         return self.data["display"]
 
-    # @property
-    # def screen_direction(self) -> DisplayOrientation:
-    #     return DisplayOrientation(self.data["screen_direction"])
+    @property
+    def screen_direction(self) -> DisplayOrientation:
+        return DisplayOrientation(self.data["screen_direction"])
 
     def __repr__(self) -> str:
         s = "<AirFreshStatus power=%s, " \
@@ -331,7 +331,7 @@ class XiaomiAirFreshD(FanEntity):
         return self._ptc_list
 
     @property
-    def ptc_level(self):
+    def ptc_mode(self):
         if self._state:
             return OperationPTCLevel(self._state_attrs[ATTR_PTCLEVEL]).name
 
@@ -342,7 +342,7 @@ class XiaomiAirFreshD(FanEntity):
         return self._screen_directions
 
     @property
-    def screen_direction(self):
+    def display_direction(self):
         if self._state:
             return DisplayOrientation(self._state_attrs[ATTR_SCNDIR]).name
 
