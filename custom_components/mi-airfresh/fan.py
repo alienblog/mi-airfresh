@@ -25,13 +25,41 @@ CONF_MODEL = 'model'
 ATTR_PM25 = 'pm25'
 ATTR_MODE = 'mode'
 ATTR_CO2 = 'co2'
+ATTR_OUTTEMP = 'temperature_outside'
+ATTR_FAVSPD = 'favourite_speed'
+ATTR_CTLSPD = 'control_speed'
+ATTR_FTRINTERMEDIATE = 'filter_intermediate'
+ATTR_FTRINTERDAY = 'filter_inter_day'
+ATTR_FTREFFICIENT = 'filter_efficient'
+ATTR_FTREFFIDAY = 'filter_effi_day'
+ATTR_PTCON = 'ptc_on'
+ATTR_PTCLEVEL = 'ptc_level'
+ATTR_PTCSTATUS = 'ptc_status'
+ATTR_CHILDLOCK = 'child_lock'
+ATTR_SOUND = 'sound'
+ATTR_DISPLAY = 'display'
+ATTR_SCNDIR = 'screen_direction'
 
 SUCCESS = ['ok']
 
 AVAILABLE_ATTRIBUTES_AIRFRESH = {
     ATTR_PM25: 'pm25',
     ATTR_CO2: 'co2',
-    ATTR_MODE: 'mode'
+    ATTR_MODE: 'mode',
+    ATTR_OUTTEMP: 'temperature_outside',
+    ATTR_FAVSPD: 'favourite_speed',
+    ATTR_CTLSPD: 'control_speed',
+    ATTR_FTRINTERMEDIATE: 'filter_intermediate',
+    ATTR_FTRINTERDAY: 'filter_inter_day',
+    ATTR_FTREFFICIENT: 'filter_efficient',
+    ATTR_FTREFFIDAY: 'filter_effi_day',
+    ATTR_PTCON: 'ptc_on',
+    ATTR_PTCLEVEL: 'ptc_level',
+    ATTR_PTCSTATUS: 'ptc_status',
+    ATTR_CHILDLOCK: 'child_lock',
+    ATTR_SOUND: 'sound',
+    ATTR_DISPLAY: 'display',
+    ATTR_SCNDIR: 'screen_direction'
 }
 
 FEATURE_SET_BUZZER = 1
@@ -63,6 +91,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
 })
 
 OPERATION_MODES_AIRFRESH = ['Off', 'Auto', 'Sleep', 'Favourite']
+OPERATION_LEVELS_PTC = ['Off', 'Low', 'Medium', 'High']
 
 ATTR_MODEL = 'model'
 
@@ -72,6 +101,12 @@ class OperationMode(Enum):
     Auto = 'auto'
     Sleep = 'sleep'
     Favourite = 'favourite'
+
+class OperationPTCLevel(Enum):
+    Off = 'off'
+    Low = 'low'
+    Medium = 'medium'
+    High = 'high'
 
 
 async def async_setup_platform(hass, config, async_add_entities,
@@ -136,6 +171,38 @@ class AirFreshDStatus:
         """Current operation mode."""
         return OperationMode(self.data["mode"])
 
+    @property
+    def temperature_outside(self) -> int:
+        """Outside Temperature"""
+        return self.data["temperature_outside"]
+
+    @property
+    def favourite_speed(self) -> int:
+        """Favourite Speed"""
+        return self.data["favourite_speed"]
+
+    @property
+    def control_speed(self) -> int:
+        """Control Speed"""
+        return self.data["control_speed"]
+
+    @property
+    def filter_intermediate(self) -> int:
+        """Filter of Intermediate Dead"""
+        return self.data["filter_intermediate"]
+
+    @property
+    def filter_inter_day(self) -> int:
+        return self.data["filter_inter_day"]
+
+    @property
+    def filter_efficient(self) -> int:
+        return self.data["filter_efficient"]
+
+    @property
+    def filter_effi_day(self) -> int:
+        return self.data["filter_effi_day"]
+
     def __repr__(self) -> str:
         s = "<AirFreshStatus power=%s, " \
             "pm25=%s, " \
@@ -171,6 +238,7 @@ class XiaomiAirFreshD(FanEntity):
         self._device_features = FEATURE_FLAGS_DAIRFRESH
         self._available_attributes = AVAILABLE_ATTRIBUTES_AIRFRESH
         self._speed_list = OPERATION_MODES_AIRFRESH
+        self._ptc_list = OPERATION_LEVELS_PTC
         self._state_attrs.update(
             {attribute: None for attribute in self._available_attributes})
   
@@ -222,6 +290,18 @@ class XiaomiAirFreshD(FanEntity):
 
         return None
 
+    @property
+    def ptc_list(self) -> list:
+        """Get the list of available ptc levels."""
+        return self._ptc_list
+
+    @property
+    def ptc_level(self):
+        if self._state:
+            return OperationPTCLevel(self._state_attrs[ATTR_PTCLEVEL]).name
+
+        return None
+
     @staticmethod
     def _extract_value_from_attribute(state, attribute):
         value = getattr(state, attribute)
@@ -231,7 +311,10 @@ class XiaomiAirFreshD(FanEntity):
         return value
 
     def get_status(self):
-        properties = ["power", "pm25", "co2", "mode"]
+        properties = ["power", "pm25", "co2", "mode", "temperature_outside", 
+            "favourite_speed", "control_speed", "filter_intermediate", "filter_inter_day",
+            "filter_efficient", "filter_effi_day", "ptc_on", "ptc_level", "ptc_status",
+            "sound", "display", "screen_direction"]
 
         # A single request is limited to 16 properties. Therefore the
         # properties are divided into multiple requests
