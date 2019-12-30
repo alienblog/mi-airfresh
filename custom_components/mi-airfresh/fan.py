@@ -108,6 +108,10 @@ class OperationPTCLevel(Enum):
     Medium = 'medium'
     High = 'high'
 
+class DisplayOrientation(Enum):
+    Portrait = "forward"
+    LandscapeLeft = "left"
+    LandscapeRight = "right"
 
 async def async_setup_platform(hass, config, async_add_entities,
                                discovery_info=None):
@@ -150,6 +154,11 @@ class AirFreshDStatus:
     def power(self) -> bool:
         """Power state."""
         return self.data["power"]
+
+    @property
+    def ptc_on(self) -> bool:
+        """PTC Power state"""
+        return self.data["ptc_on"]
 
     @property
     def is_on(self) -> bool:
@@ -202,6 +211,30 @@ class AirFreshDStatus:
     @property
     def filter_effi_day(self) -> int:
         return self.data["filter_effi_day"]
+
+    @property
+    def ptc_level(self) -> OperationPTCLevel:
+        return OperationPTCLevel(self.data["ptc_level"])
+
+    @property
+    def ptc_status(self) -> bool:
+        return self.data["ptc_status"]
+
+    @property
+    def child_lock(self) -> bool:
+        return self.data["child_lock"]
+
+    @property
+    def sound(self) -> bool:
+        return self.data["sound"]
+
+    @property
+    def display(self) -> bool:
+        return self.data["display"]
+
+    @property
+    def screen_direction(self) -> DisplayOrientation:
+        return DisplayOrientation(self.data["screen_direction"])
 
     def __repr__(self) -> str:
         s = "<AirFreshStatus power=%s, " \
